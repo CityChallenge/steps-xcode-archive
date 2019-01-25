@@ -267,6 +267,16 @@ inputs:
       - "yes"
       - "no"
       is_required: true
+  - export_ondemandresources: "no"
+    opts:
+      category: Debug
+      title: Export OnDemandResources
+      description: |-
+        If this input is set to `yes` the OnDemandResources folder will be moved to the `output_dir`.
+      value_options:
+      - "yes"
+      - "no"
+      is_required: true
   - verbose_log: "yes"
     opts:
       category: Debug

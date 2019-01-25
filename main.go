@@ -105,7 +105,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 		IsExportXcarchiveZip: os.Getenv("is_export_xcarchive_zip"),
 		ExportAllDsyms:       os.Getenv("export_all_dsyms"),
-		ExportOnDemandResources: os.Getenv("export_ondemandresouces"),
+		ExportOnDemandResources: os.Getenv("export_ondemandresources"),
 		ArtifactName:         os.Getenv("artifact_name"),
 		VerboseLog:           os.Getenv("verbose_log"),
 	}

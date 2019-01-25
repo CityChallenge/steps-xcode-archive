@@ -396,7 +396,12 @@ func main() {
 		fail("Failed to create temp dir for archives, error: %s", err)
 	}
 	tmpArchivePath := filepath.Join(tmpArchiveDir, configs.ArtifactName+".xcarchive")
-
+	
+	tmpDir, err := pathutil.NormalizedOSTempDirPath("__export__")
+	if err != nil {
+		fail("Failed to create tmp dir, error: %s", err)
+	}
+	
 	appPath := filepath.Join(configs.OutputDir, configs.ArtifactName+".app")
 	ipaPath := filepath.Join(configs.OutputDir, configs.ArtifactName+".ipa")
 	odrPath := filepath.Join(configs.OutputDir, "OnDemandResources")
@@ -857,11 +862,6 @@ is available in the $BITRISE_XCODE_RAW_RESULT_TEXT_PATH environment variable`)
 
 		fmt.Println()
 
-		tmpDir, err := pathutil.NormalizedOSTempDirPath("__export__")
-		if err != nil {
-			fail("Failed to create tmp dir, error: %s", err)
-		}
-
 		exportCmd := xcodebuild.NewExportCommand()
 		exportCmd.SetArchivePath(tmpArchivePath)
 		exportCmd.SetExportDir(tmpDir)
@@ -1051,7 +1051,7 @@ is available in the $BITRISE_IDEDISTRIBUTION_LOGS_PATH environment variable`)
 		}
 		
 		if configs.ExportOnDemandResources == "yes" {
-			if err := utils.ExportOutputDir(filepath.Join(tmpDir, 'OnDemandResources'), odrPath, bitriseODRDirPthEnvKey); err != nil {
+			if err := utils.ExportOutputDir(filepath.Join(tmpDir, "OnDemandResources"), odrPath, bitriseODRDirPthEnvKey); err != nil {
 				fail("Failed to export %s, error: %s", bitriseODRDirPthEnvKey, err)
 			}
 

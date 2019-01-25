@@ -1055,7 +1055,7 @@ is available in the $BITRISE_IDEDISTRIBUTION_LOGS_PATH environment variable`)
 				fail("Failed to export %s, error: %s", bitriseODRDirPthEnvKey, err)
 			}
 
-			log.Donef("The OnDemandResources dir path is now available in the Environment Variable: %s (value: %s)", bitriseODRDirPthEnvKey, dsymDir)
+			log.Donef("The OnDemandResources dir path is now available in the Environment Variable: %s (value: %s)", bitriseODRDirPthEnvKey, odrPath)
 		}
 
 		if err := utils.ExportOutputDir(dsymDir, dsymDir, bitriseDSYMDirPthEnvKey); err != nil {

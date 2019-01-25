@@ -43,6 +43,7 @@ const (
 	bitriseXCArchiveZipPthEnvKey        = "BITRISE_XCARCHIVE_ZIP_PATH"
 	bitriseAppDirPthEnvKey              = "BITRISE_APP_DIR_PATH"
 	bitriseIPAPthEnvKey                 = "BITRISE_IPA_PATH"
+	bitriseODRDirPthEnvKey             = "BITRISE_ODR_DIR_PATH"
 	bitriseDSYMDirPthEnvKey             = "BITRISE_DSYM_DIR_PATH"
 	bitriseDSYMPthEnvKey                = "BITRISE_DSYM_PATH"
 )
@@ -73,6 +74,7 @@ type ConfigsModel struct {
 
 	IsExportXcarchiveZip string
 	ExportAllDsyms       string
+	ExportOnDemandResources string
 	ArtifactName         string
 	VerboseLog           string
 }
@@ -103,6 +105,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 		IsExportXcarchiveZip: os.Getenv("is_export_xcarchive_zip"),
 		ExportAllDsyms:       os.Getenv("export_all_dsyms"),
+		ExportOnDemandResources: os.Getenv("export_ondemandresouces"),
 		ArtifactName:         os.Getenv("artifact_name"),
 		VerboseLog:           os.Getenv("verbose_log"),
 	}
@@ -145,6 +148,7 @@ func (configs ConfigsModel) print() {
 	log.Infof("step output configs:")
 	log.Printf("- IsExportXcarchiveZip: %s", configs.IsExportXcarchiveZip)
 	log.Printf("- ExportAllDsyms: %s", configs.ExportAllDsyms)
+	log.Printf("- ExportOnDemandResources: %s", configs.ExportOnDemandResources)
 	log.Printf("- ArtifactName: %s", configs.ArtifactName)
 	log.Printf("- VerboseLog: %s", configs.VerboseLog)
 	fmt.Println()
@@ -202,6 +206,11 @@ func (configs ConfigsModel) validate() error {
 	if err := input.ValidateWithOptions(configs.ExportAllDsyms, "yes", "no"); err != nil {
 		return errors.New("issue with input ExportAllDsyms: " + err.Error())
 	}
+	
+	if err := input.ValidateWithOptions(configs.ExportOnDemandResources, "yes", "no"); err != nil {
+		return errors.New("issue with input ExportOnDemandResources: " + err.Error())
+	}
+	
 	if err := input.ValidateWithOptions(configs.VerboseLog, "yes", "no"); err != nil {
 		return errors.New("issue with input VerboseLog: " + err.Error())
 	}
@@ -390,6 +399,7 @@ func main() {
 
 	appPath := filepath.Join(configs.OutputDir, configs.ArtifactName+".app")
 	ipaPath := filepath.Join(configs.OutputDir, configs.ArtifactName+".ipa")
+	odrPath := filepath.Join(configs.OutputDir, "OnDemandResources")
 	exportOptionsPath := filepath.Join(configs.OutputDir, "export_options.plist")
 	rawXcodebuildOutputLogPath := filepath.Join(configs.OutputDir, "raw-xcodebuild-output.log")
 
@@ -401,6 +411,7 @@ func main() {
 	filesToCleanup := []string{
 		appPath,
 		ipaPath,
+		odrPath,
 		exportOptionsPath,
 		rawXcodebuildOutputLogPath,
 
@@ -1037,6 +1048,14 @@ is available in the $BITRISE_IDEDISTRIBUTION_LOGS_PATH environment variable`)
 					fail("Failed to copy (%s) -> (%s), error: %s", dsym, dsymDir, err)
 				}
 			}
+		}
+		
+		if configs.ExportOnDemandResources == "yes" {
+			if err := utils.ExportOutputDir(filepath.Join(tmpDir, 'OnDemandResources'), odrPath, bitriseODRDirPthEnvKey); err != nil {
+				fail("Failed to export %s, error: %s", bitriseODRDirPthEnvKey, err)
+			}
+
+			log.Donef("The OnDemandResources dir path is now available in the Environment Variable: %s (value: %s)", bitriseODRDirPthEnvKey, dsymDir)
 		}
 
 		if err := utils.ExportOutputDir(dsymDir, dsymDir, bitriseDSYMDirPthEnvKey); err != nil {
